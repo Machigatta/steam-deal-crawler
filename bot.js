@@ -1,3 +1,15 @@
+/*
+  globals
+
+  arg1 = saveToFile
+  arg2 = sendToWebhook
+  arg3 = logActions
+
+*/
+const SAVE_TO_FILE = process.argv[2] == true;
+const SEND_TO_WEBHOOK = process.argv[3];
+const LOG_ACTIONS = process.argv[4];
+
 //node-modules
 var request = require('request');
 var jsdom = require("jsdom");
@@ -36,6 +48,12 @@ function findDiscountsWithPerTag(tagId, pageResults, specificTagList) {
                 var price = $(game).find('div.discount_block > div.discount_prices > div.discount_final_price').text()
                 var discount = $(game).find('div.discount_block > div.discount_pct').text()
                 console.log("The game >>" + name + "<< is reduced by " + discount + " to " + price + ".");
+                if (SAVE_TO_FILE) {
+                    //To-Do Save result to file
+                }
+                if (SEND_TO_WEBHOOK) {
+                    //To-Do Send result to webhook
+                }
             });
 
             if (json_body["total_count"] >= pageResults + 10) {
@@ -48,4 +66,9 @@ function findDiscountsWithPerTag(tagId, pageResults, specificTagList) {
 
 }
 
-findDiscountsWithPerTag(4085);
+var tagIdList = [];
+tagIdList = [4085];
+
+$(tagIdList).each(function(i, el) {
+    findDiscountsWithPerTag(el);
+})
