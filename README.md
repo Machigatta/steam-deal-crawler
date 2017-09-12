@@ -13,7 +13,7 @@ This node-js crawler searches through a tag-name and lists every discount with p
 ## Config
 To switch the notification-type just use the `config.json`.
 
-On my example i used the `recommended` list from [http://store.steampowered.com/tag/browse/]Steam itself. If you clink on an tag on the left list, you are able to retrieve your tag-ids:
+On my example i used the `recommended` list from <a href="http://store.steampowered.com/tag/browse/">Steam</a> itself. If you clink on an tag on the left list, you are able to retrieve your tag-ids:
 
 - `http://store.steampowered.com/tag/browse/#recommended_4085` -> 4085
 - `http://store.steampowered.com/tag/browse/#recommended_6650` -> 6650
