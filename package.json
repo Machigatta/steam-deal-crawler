@@ -1,0 +1,32 @@
+{
+    "name": "steam-deal-crawler",
+    "version": "1.0.1",
+    "description": "Crawl your Tags for discounts",
+    "main": "bot.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node bot.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Machigatta/steam-deal-crawler.git"
+    },
+    "keywords": [
+        "steam",
+        "discount",
+        "crawler",
+        "node-js",
+        "tags"
+    ],
+    "author": "Armin Seidling",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Machigatta/steam-deal-crawler/issues"
+    },
+    "homepage": "https://github.com/Machigatta/steam-deal-crawler#readme",
+    "dependencies": {
+        "jquery": "^3.2.1",
+        "jsdom": "^11.2.0",
+        "request": "^2.81.0"
+    }
+}

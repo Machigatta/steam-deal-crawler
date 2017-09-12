@@ -10,16 +10,18 @@ var $ = require("jquery")(dom.window);
 function findDiscountsWithPerTag(tagId, pageResults, specificTagList) {
 
     if (typeof pageResults === 'undefined') { pageResults = 0; }
-    if (typeof specificTagList === 'undefined') { specificTagList = ""; }
+    if (typeof specificTagList === 'undefined') { specificTagList = []; }
 
     var extraTagList = "";
 
-    if (typeof specificTagList !== 'undefined') {
-        "tag[]=" + test.join("&tag[]=") + "&";
+    if (typeof specificTagList !== 'undefined' && specificTagList.length > 0) {
+        $(specificTagList).each(function(i, el) {
+            extraTagList += "&tag[" + i + "]=" + el;
+        })
     }
 
     var options = {
-        url: 'http://store.steampowered.com/tagdata/querypaginated/de/' + tagId + '/Discounts/render/?query=&start=' + pageResults + '&count=10&cc=DE&l=german&no_violence=0&no_sex=0&v=4',
+        url: 'http://store.steampowered.com/tagdata/querypaginated/de/' + tagId + '/Discounts/render/?query=&start=' + pageResults + '&count=10&cc=DE&l=german&no_violence=0&no_sex=0&v=4' + extraTagList,
         method: 'GET',
         json: true
     }
@@ -46,4 +48,4 @@ function findDiscountsWithPerTag(tagId, pageResults, specificTagList) {
 
 }
 
-findDiscountsWithPerTag(4085, 0, [3799]);
+findDiscountsWithPerTag(4085);
