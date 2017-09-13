@@ -15,10 +15,18 @@ var request = require('request');
 var jsdom = require("jsdom");
 var dom = new jsdom.JSDOM(`<!DOCTYPE html>`);
 var $ = require("jquery")(dom.window);
+var fs = require('fs');
 
-/**
-  Anime-Subsection
-*/
+
+
+var config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
+const FILE_PATH = config.saveConfig.filePath;
+const LOG_PATH = config.saveConfig.logPath;
+const ID_ARRAY = config.tag_id_list;
+
+
+var gamesWithDiscound = {};
+
 function findDiscountsWithPerTag(tagId, pageResults, specificTagList) {
 
     if (typeof pageResults === 'undefined') { pageResults = 0; }
@@ -41,24 +49,26 @@ function findDiscountsWithPerTag(tagId, pageResults, specificTagList) {
         if (error) { console.log(error); } else {
             body = "<div>" + json_body["results_html"] + "</div>";
 
-            console.log("> Checking Discount-Page number " + ((pageResults + 10) / 10) + " for the Tag: " + tagId);
+            //console.log("> Checking Discount-Page number " + ((pageResults + 10) / 10) + " for the Tag: " + tagId);
 
             $(body).find('a').each(function(index, game) {
                 var name = $(game).find('div.tab_item_content > div.tab_item_name').text();
-                var price = $(game).find('div.discount_block > div.discount_prices > div.discount_final_price').text()
-                var discount = $(game).find('div.discount_block > div.discount_pct').text()
-                console.log("The game >>" + name + "<< is reduced by " + discount + " to " + price + ".");
-                if (SAVE_TO_FILE) {
-                    //To-Do Save result to file
+                var price = $(game).find('div.discount_block > div.discount_prices > div.discount_final_price').text();
+                var discount = $(game).find('div.discount_block > div.discount_pct').text();
+                // console.log("The game >>" + name + "<< is reduced by " + discount + " to " + price + ".");
+
+                if (!gamesWithDiscound.hasOwnProperty(tagId)) {
+                    gamesWithDiscound[tagId] = [];
                 }
-                if (SEND_TO_WEBHOOK) {
-                    //To-Do Send result to webhook
-                }
+
+                gamesWithDiscound[tagId].push({ game_name: name, game_price: price, game_discount: discount });
             });
 
             if (json_body["total_count"] >= pageResults + 10) {
-                console.log("There are more pages to go to...");
+                //console.log("There are more pages to go to...");
                 findDiscountsWithPerTag(tagId, pageResults + 10, specificTagList);
+            } else {
+                callBack();
             }
 
         }
@@ -66,9 +76,23 @@ function findDiscountsWithPerTag(tagId, pageResults, specificTagList) {
 
 }
 
-var tagIdList = [];
-tagIdList = [4085];
+var callBackCount = 0;
 
-$(tagIdList).each(function(i, el) {
-    findDiscountsWithPerTag(el);
+function callBack() {
+    callBackCount++;
+    if (ID_ARRAY.length == callBackCount) {
+        console.log(gamesWithDiscound);
+
+        if (SAVE_TO_FILE) {
+            //To-Do Save result to file
+        }
+        if (SEND_TO_WEBHOOK) {
+            //To-Do Send result to webhook
+        }
+    }
+
+}
+
+ID_ARRAY.forEach(function(object) {
+    findDiscountsWithPerTag(object.id, 0, object.taglist);
 })

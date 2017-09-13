@@ -29,6 +29,7 @@ These ids will be used in the config.
 - request
 - jsdom
 - jquery
+- fs
 
 ## License 
     The MIT License (MIT)
