@@ -6,9 +6,9 @@
   arg3 = logActions
 
 */
-const SAVE_TO_FILE = process.argv[2] == true;
-const SEND_TO_WEBHOOK = process.argv[3];
-const LOG_ACTIONS = process.argv[4];
+const SAVE_TO_FILE = process.argv[2] === undefined ? process.argv[2] : false;
+const SEND_TO_WEBHOOK = process.argv[3] === undefined ? process.argv[3] : false;
+const LOG_ACTIONS = process.argv[4] === undefined ? process.argv[4] : true;
 
 //node-modules
 var request = require('request');
@@ -81,16 +81,31 @@ var callBackCount = 0;
 function callBack() {
     callBackCount++;
     if (ID_ARRAY.length == callBackCount) {
-        console.log(gamesWithDiscound);
+        if (LOG_ACTIONS) {
+            for (var key in gamesWithDiscound) {
+                if (!gamesWithDiscound.hasOwnProperty(key)) continue;
 
-        if (SAVE_TO_FILE) {
-            //To-Do Save result to file
-        }
-        if (SEND_TO_WEBHOOK) {
-            //To-Do Send result to webhook
+                var obj = gamesWithDiscound[key];
+                var logMessage = "Found " + obj.length + " reduced games for Category-Tag: " + key;
+
+                logAction(logMessage);
+            }
         }
     }
 
+
+    if (SAVE_TO_FILE) {
+        //To-Do Save result to file
+    }
+    if (SEND_TO_WEBHOOK) {
+        //To-Do Send result to webhook
+    }
+}
+
+function logAction(content) {
+    var today = new Date();
+    content = "[" + (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear() + "] " + content + "\n";
+    fs.appendFile('./logs/' + (today.getMonth() + 1) + '_' + today.getDate() + '_' + today.getFullYear() + '.log', content, 'utf-8');
 }
 
 ID_ARRAY.forEach(function(object) {
