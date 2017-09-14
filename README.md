@@ -24,6 +24,45 @@ And so on...
 
 These ids will be used in the config.
 
+### Empty-Example
+
+```json
+{
+    "saveConfig": {
+        "filePath": "./data/",
+        "logPath": "./logs/"
+    },
+    "tag_id_list": [{
+        "id": 1,
+        "name": "",
+        "taglist": []
+    }, {
+        "id": 2,
+        "name": ""
+    }]
+}
+```
+
+### Filled-Example
+
+```json
+{
+    "saveConfig": {
+        "filePath": "./data/",
+        "logPath": "./logs/"
+    },
+    "tag_id_list": [{
+        "id": 4085,
+        "name": "Anime",
+        "taglist": []
+    }, {
+        "id": 3968,
+        "name": "Physik",
+        "taglist": []
+    }]
+}
+```
+
 ## node-js-modules
 
 - request

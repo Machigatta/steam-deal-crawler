@@ -1,13 +1,15 @@
 {
     "saveConfig": {
-        "filePath": "/",
-        "logPath": "/"
+        "filePath": "./data/",
+        "logPath": "./logs/"
     },
     "tag_id_list": [{
         "id": 4085,
+        "name": "Anime",
         "taglist": []
     }, {
-        "id": 3964,
+        "id": 3968,
+        "name": "Physik",
         "taglist": []
     }]
 }
