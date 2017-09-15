@@ -1,14 +1,3 @@
-/*
-  argument-validation
-  arg1 = INTERVAL
-  arg2 = logActions
-*/
-const T_INTERVAL = process.argv[2] !== undefined ? process.argv[2] : (60000 * 60);
-const T_INTERVAL_SET = process.argv[2] !== undefined ? process.argv[2] : false;
-const LOG_ACTIONS = process.argv[3] !== undefined ? process.argv[3] : true;
-//const SAVE_TO_FILE = process.argv[3] === undefined ? process.argv[3] : false;
-//const SEND_TO_WEBHOOK = process.argv[4] === undefined ? process.argv[4] : false;
-
 //node-modules
 var request = require('request');
 var jsdom = require("jsdom");
@@ -16,14 +5,34 @@ var dom = new jsdom.JSDOM(`<!DOCTYPE html>`);
 var $ = require("jquery")(dom.window);
 var fs = require('fs');
 
+/*
+  argument-validation
+  arg1 = INTERVAL in minutes -> min = 5
+  arg2 = logActions
+*/
+const GLOBALS = {
+    T_INTERVAL: process.argv[2] !== undefined ? process.argv[2] < 5 ? (60000 * 5) : (process.argv[2] * 60000) : (60000 * 60),
+    T_INTERVAL_SET: process.argv[2] !== undefined ? true : false,
+    LOG_ACTIONS: process.argv[3] !== undefined ? process.argv[3] : true
+}
+
 //global variables
 const CONFIG = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
-const FILE_PATH = CONFIG.saveConfig.filePath;
-const LOG_PATH = CONFIG.saveConfig.logPath;
-const ID_ARRAY = CONFIG.tag_id_list;
-var globalTagList = {};
-var callBackCount = 0;
-var gamesWithDiscound = {};
+const SETTINGS = {
+    FILE_PATH: CONFIG.saveConfig.filePath,
+    LOG_PATH: CONFIG.saveConfig.logPath,
+    ID_ARRAY: CONFIG.tag_id_list,
+    EXPORT_TYPE: CONFIG.saveConfig.exportType,
+    INITIALIZE_OLDITEMS: true,
+    DEBUG: true
+}
+var globalVariables = {
+    globalTagList: {},
+    callBackCount: 0,
+    gamesWithDiscound: {},
+    today: null,
+    todayDate: null
+}
 
 //main function for recursive iteration through results
 function findDiscountsWithPerTag(object, pageResults) {
@@ -31,7 +40,7 @@ function findDiscountsWithPerTag(object, pageResults) {
 
     var tagId = object.id;
     var specificTagList = object.taglist;
-    globalTagList[tagId] = object.name;
+    globalVariables.globalTagList[tagId] = object.name;
     var extraTagList = "";
 
     //taglists are used to filter-results even further
@@ -58,11 +67,11 @@ function findDiscountsWithPerTag(object, pageResults) {
                 var discount = $(game).find('div.discount_block > div.discount_pct').text();
                 // console.log("The game >>" + name + "<< is reduced by " + discount + " to " + price + ".");
 
-                if (!gamesWithDiscound.hasOwnProperty(tagId)) {
-                    gamesWithDiscound[tagId] = [];
+                if (!globalVariables.gamesWithDiscound.hasOwnProperty(tagId)) {
+                    globalVariables.gamesWithDiscound[tagId] = [];
                 }
 
-                gamesWithDiscound[tagId].push({ game_name: name, game_price: price, game_discount: discount });
+                globalVariables.gamesWithDiscound[tagId].push({ game_name: name, game_price: price, game_discount: discount });
             });
 
             if (json_body["total_count"] >= pageResults + 10) {
@@ -77,52 +86,107 @@ function findDiscountsWithPerTag(object, pageResults) {
 
 }
 
+//callBack and logging/exporting data
 function callBack() {
-    callBackCount++;
-    if (ID_ARRAY.length == callBackCount) {
-        if (LOG_ACTIONS) {
-            for (var key in gamesWithDiscound) {
-                if (!gamesWithDiscound.hasOwnProperty(key)) continue;
+    globalVariables.callBackCount++;
+    if (SETTINGS.ID_ARRAY.length == globalVariables.callBackCount) {
+        var saved_data_string = fs.readFileSync(SETTINGS.FILE_PATH, 'utf8');
+        var saved_data = JSON.parse(saved_data_string == "" ? "{}" : saved_data_string);
+        if (GLOBALS.LOG_ACTIONS) {
 
-                var obj = gamesWithDiscound[key];
-                var logMessage = "Found " + obj.length + " reduced games for Category-Tag: " + globalTagList[key];
+            var i = 0;
+
+            for (var key in globalVariables.gamesWithDiscound) {
+                if (!globalVariables.gamesWithDiscound.hasOwnProperty(key)) continue;
+
+                var obj = globalVariables.gamesWithDiscound[key];
+                var logMessage = "[STATUS] Found " + obj.length + " reduced games for Category-Tag: " + globalVariables.globalTagList[key];
                 logAction(logMessage);
+                if (saved_data.hasOwnProperty(key)) {
+                    var saved_obj = saved_data[key];
+                }
                 obj.forEach(function(single_obj) {
-                    var singleLogMessage = " - " + single_obj.game_name + " with " + single_obj.game_discount + " to " + single_obj.game_price;
-                    logAction(singleLogMessage);
+                    var newEntry = true;
+                    if (saved_obj !== undefined) {
+
+                        saved_obj.forEach(function(single_saved_obj) {
+
+                            if (single_saved_obj.game_name == single_obj.game_name) {
+                                newEntry = false;
+                            }
+
+                        });
+                    }
+
+                    if (newEntry && SETTINGS.INITIALIZE_OLDITEMS) {
+                        var singleLogMessage = "[NEW] " + single_obj.game_name + " with " + single_obj.game_discount + " to " + single_obj.game_price;
+                        i++;
+                        logAction(singleLogMessage);
+                    }
                 })
             }
+
+            if (i > 0 && SETTINGS.INITIALIZE_OLDITEMS) {
+                logAction("[END] " + i + " new Entrys.");
+            } else {
+                logAction("[END] Nothing new found.");
+            }
         }
+        fs.writeFile(SETTINGS.FILE_PATH, JSON.stringify(globalVariables.gamesWithDiscound), 'utf-8', function(err) {
+            if (err) console.log(err);
+        });
+
+        globalVariables.globalTagList = {};
+        globalVariables.callBackCount = 0;
+        globalVariables.gamesWithDiscound = {};
     }
-
-
-    // if (SAVE_TO_FILE) {
-    //     //To-Do Save result to file
-    // }
-    // if (SEND_TO_WEBHOOK) {
-    //     //To-Do Send result to webhook
-    // }
 }
 
+//logging-helper
 function logAction(content) {
-    var today = new Date();
-    content = "[" + (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear() + "] " + content + "\n";
-    var logFileName = LOG_PATH + (today.getMonth() + 1) + '_' + today.getDate() + '_' + today.getFullYear() + '.log';
-    fs.appendFile(logFileName1, content, 'utf-8', function(err) {
+    content = globalVariables.todayDate + " " + content;
+    var logFileName = SETTINGS.LOG_PATH + (globalVariables.today.getMonth() + 1) + '_' + globalVariables.today.getDate() + '_' + globalVariables.today.getFullYear() + '.log';
+    SETTINGS.DEBUG ? console.log(content) : "";
+    fs.appendFile(logFileName, content + "\n", 'utf-8', function(err) {
         if (err) console.log(err);
     });
 }
 
-
+//main-function
 function execute() {
-    ID_ARRAY.forEach(function(object) {
+    globalVariables.today = new Date();
+    globalVariables.todayDate = "[" + (globalVariables.today.getMonth() + 1) + '/' + globalVariables.today.getDate() + '/' + globalVariables.today.getFullYear() + " " + (globalVariables.today.getHours() < 10 ? "0" + globalVariables.today.getHours() : globalVariables.today.getHours()) + ":" + (globalVariables.today.getMinutes() < 10 ? "0" + globalVariables.today.getMinutes() : globalVariables.today.getMinutes()) + "]";
+    SETTINGS.DEBUG ? console.log(globalVariables.todayDate + " [START] Executing main-functionality") : "";
+    SETTINGS.ID_ARRAY.forEach(function(object) {
         findDiscountsWithPerTag(object, 0);
     });
 }
 
-if (T_INTERVAL_SET) {
+//export the result to a specific export-type
+function exportData() {
+    var types = SETTINGS.EXPORT_TYPE.split("|");
+    types.forEach(function(single_type) {
+        switch (single_type) {
+            case "JSON":
+
+                break;
+            case "XML":
+
+                break;
+            case "WEBHOOK":
+
+                break;
+            default:
+                console.log(single_type + " is not a valid Export-Type.");
+                break;
+        }
+    });
+}
+
+//RUN
+if (GLOBALS.T_INTERVAL_SET) {
     execute();
-    setTimeout(execute(), T_INTERVAL);
+    setInterval(function() { execute(); }, GLOBALS.T_INTERVAL);
 } else {
     execute();
 }

@@ -1,7 +1,8 @@
 {
     "saveConfig": {
-        "filePath": "./data/",
-        "logPath": "./logs/"
+        "filePath": "./data/saved.json",
+        "logPath": "./logs/",
+        "exportType": "JSON"
     },
     "tag_id_list": [{
         "id": 4085,
