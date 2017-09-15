@@ -4,6 +4,7 @@ var jsdom = require("jsdom");
 var dom = new jsdom.JSDOM(`<!DOCTYPE html>`);
 var $ = require("jquery")(dom.window);
 var fs = require('fs');
+var url = require('url');
 
 /*
   argument-validation
@@ -17,7 +18,7 @@ const GLOBALS = {
 }
 
 //global variables
-const CONFIG = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
+const CONFIG = JSON.parse(fs.readFileSync('./data/config.json', 'utf8'));
 const SETTINGS = {
     FILE_PATH: CONFIG.saveConfig.filePath,
     LOG_PATH: CONFIG.saveConfig.logPath,
@@ -62,16 +63,20 @@ function findDiscountsWithPerTag(object, pageResults) {
             //console.log("> Checking Discount-Page number " + ((pageResults + 10) / 10) + " for the Tag: " + tagId);
 
             $(body).find('a').each(function(index, game) {
-                var name = $(game).find('div.tab_item_content > div.tab_item_name').text();
-                var price = $(game).find('div.discount_block > div.discount_prices > div.discount_final_price').text();
-                var discount = $(game).find('div.discount_block > div.discount_pct').text();
+                //to cut the '?snr=1_237_1600__106_5' from the url and minimize the data
+                var myurl = url.parse($(game).attr("href"), true);
+                var v_link = myurl.host + myurl.pathname;
+                var v_id = $(game).data("ds-appid");
+                var v_name = $(game).find('div.tab_item_content > div.tab_item_name').text();
+                var v_price = $(game).find('div.discount_block > div.discount_prices > div.discount_final_price').text();
+                var v_discount = $(game).find('div.discount_block > div.discount_pct').text();
                 // console.log("The game >>" + name + "<< is reduced by " + discount + " to " + price + ".");
 
                 if (!globalVariables.gamesWithDiscound.hasOwnProperty(tagId)) {
                     globalVariables.gamesWithDiscound[tagId] = [];
                 }
 
-                globalVariables.gamesWithDiscound[tagId].push({ game_name: name, game_price: price, game_discount: discount });
+                globalVariables.gamesWithDiscound[tagId].push({ _id: v_id, _name: v_name, _price: v_price, _discount: v_discount, _link: v_link });
             });
 
             if (json_body["total_count"] >= pageResults + 10) {
@@ -111,7 +116,7 @@ function callBack() {
 
                         saved_obj.forEach(function(single_saved_obj) {
 
-                            if (single_saved_obj.game_name == single_obj.game_name) {
+                            if (single_saved_obj._id == single_obj._id) {
                                 newEntry = false;
                             }
 
@@ -119,7 +124,7 @@ function callBack() {
                     }
 
                     if (newEntry && SETTINGS.INITIALIZE_OLDITEMS) {
-                        var singleLogMessage = "[NEW] " + single_obj.game_name + " with " + single_obj.game_discount + " to " + single_obj.game_price;
+                        var singleLogMessage = "[NEW] " + single_obj._name + " with " + single_obj._discount + " to " + single_obj._price;
                         i++;
                         logAction(singleLogMessage);
                     }
