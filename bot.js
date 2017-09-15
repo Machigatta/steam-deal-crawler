@@ -168,13 +168,13 @@ function exportData() {
     types.forEach(function(single_type) {
         switch (single_type) {
             case "JSON":
-
+                //TO-DO
                 break;
             case "XML":
-
+                //TO-DO
                 break;
             case "WEBHOOK":
-
+                //TO-DO
                 break;
             default:
                 console.log(single_type + " is not a valid Export-Type.");
