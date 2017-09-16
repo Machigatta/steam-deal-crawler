@@ -1,3 +1,4 @@
+# THIS ONE IS UNDER DEVELOPEMENT
 # steam-deal-crawler
 
 > Tired of adding every game from one genre to your wishlist on steam, just to be notified, when one will be on discount?
@@ -8,10 +9,34 @@ This nodeJs-Bot is a simple crawler to search through a specific Tag you always 
 This node-js crawler searches through a tag-name and lists every discount with percentage and price. The export of the result is on your side. 
 
 ## Features
-- Able to read the lists
+- Lookup every discounted item in the steam-shop
+- Filter through tags
+- Export into temporary json-datafile
+- Executing in intervals
+
+## Planed Features
+- Export into specific export-type
+
+## How to use
+#### basic
+```bash
+node bot.js 
+```
+> starts only once and logs actions
+#### interval
+```bash
+node bot.js 5
+```
+> starts in an interval of 5 minutes, parameter is expected as minutes and be > 5
+#### logging
+```bash
+node bot.js 5 false
+```
+> starts in an interval and without logging
+
 
 ## Config
-To switch the notification-type just use the `config.json`.
+To switch the notification-type just use the `./data/config.json`.
 
 On my example i used the `recommended` list from [Steam](http://store.steampowered.com/tag/browse/) itself. If you clink on an tag on the left list, you are able to retrieve your tag-ids:
 
@@ -24,21 +49,22 @@ And so on...
 
 These ids will be used in the config.
 
-### Empty-Example
+### Empty-Config
 
 ```json
 {
     "saveConfig": {
-        "filePath": "./data/",
-        "logPath": "./logs/"
+        "filePath": "./data/saved.json",
+        "logPath": "./logs/",
+        "exportType": "JSON"
     },
     "tag_id_list": [{
         "id": 1,
-        "name": "",
+        "name": "Tag_Name",
         "taglist": []
     }, {
         "id": 2,
-        "name": ""
+        "name": "Tag_Name"
     }]
 }
 ```
@@ -48,8 +74,9 @@ These ids will be used in the config.
 ```json
 {
     "saveConfig": {
-        "filePath": "./data/",
-        "logPath": "./logs/"
+        "filePath": "./data/saved.json",
+        "logPath": "./logs/",
+        "exportType": "JSON"
     },
     "tag_id_list": [{
         "id": 4085,
@@ -69,6 +96,7 @@ These ids will be used in the config.
 - jsdom
 - jquery
 - fs
+- url
 
 ## License 
     The MIT License (MIT)
