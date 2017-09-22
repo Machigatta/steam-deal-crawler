@@ -18,22 +18,27 @@ This node-js crawler searches through a tag-name and lists every discount with p
 - Export into specific export-type
 
 ## How to use
-#### basic
+#### if you need help
 ```bash
-node bot.js 
+node bot.js -h
 ```
-> starts only once and logs actions
-#### interval
+#### output
 ```bash
-node bot.js 5
-```
-> starts in an interval of 5 minutes, parameter is expected as minutes and be > 5
-#### logging
-```bash
-node bot.js 5 false
-```
-> starts in an interval and without logging
+  -h, --help            Show this help message and exit.
+  -v, --version         Show programs version number and exit.
 
+  -m {>= 5}, --minutes {>= 5}
+                        Process-Interval in minutes -> min value is 5
+                        [DEFAULT: 60]
+
+  -i {true,false}, --interval {true,false}
+                        determine if the process should be executed in an
+                        interval, or just once [DEFAULT: false]
+                        
+  -l {true,false}, --log {true,false}
+                        Log actions into a seperate file for each day
+                        [DEFAULT: true]
+```
 
 ## Config
 To switch the notification-type just use the `./data/config.json`.
@@ -97,6 +102,7 @@ These ids will be used in the config.
 - jquery
 - fs
 - url
+- argparse
 
 ## License 
     The MIT License (MIT)

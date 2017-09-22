@@ -5,16 +5,42 @@ var dom = new jsdom.JSDOM(`<!DOCTYPE html>`);
 var $ = require("jquery")(dom.window);
 var fs = require('fs');
 var url = require('url');
-
+var ArgumentParser = require('argparse').ArgumentParser;
+var parser = new ArgumentParser({
+    version: '0.0.1',
+    addHelp: true,
+    description: 'This node-js crawler searches through a steam-tag-name and lists every discount with percentage and price. The export of the result is on your side.'
+});
+parser.addArgument(
+    ['-m', '--minutes'], {
+        help: 'Process-Interval in minutes -> min value is 5 [DEFAULT: 60]',
+        type: 'int',
+        choices: [">= 5"]
+    }
+);
+parser.addArgument(
+    ['-i', '--interval'], {
+        help: 'determine if the process should be executed in an interval, or just once [DEFAULT: false]',
+        choices: [true, false]
+    }
+);
+parser.addArgument(
+    ['-l', '--log'], {
+        help: 'Log actions into a seperate file for each day [DEFAULT: true]',
+        choices: [true, false]
+    }
+);
+var args = parser.parseArgs();
+console.log(args);
 /*
   argument-validation
   arg1 = INTERVAL in minutes -> min = 5
   arg2 = logActions
 */
 const GLOBALS = {
-    T_INTERVAL: process.argv[2] !== undefined ? process.argv[2] < 5 ? (60000 * 5) : (process.argv[2] * 60000) : (60000 * 60),
-    T_INTERVAL_SET: process.argv[2] !== undefined ? true : false,
-    LOG_ACTIONS: process.argv[3] !== undefined ? process.argv[3] : true
+    T_INTERVAL: args.minutes !== null ? args.minutes < 5 ? (60000 * 5) : (args.minutes * 60000) : (60000 * 60),
+    T_INTERVAL_SET: args.interval !== null ? !(args.minutes == 'true') : false,
+    LOG_ACTIONS: args.log !== null ? !(args.log == 'false') : true
 }
 
 //global variables
