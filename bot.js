@@ -30,26 +30,27 @@ parser.addArgument(
         choices: [true, false]
     }
 );
+parser.addArgument(
+    ['-e', '--export'], {
+        help: 'Log actions into a seperate file for each day [DEFAULT: found in ./config.json]',
+        choices: ["JSON", "HTML", "XML"]
+    }
+);
 var args = parser.parseArgs();
-console.log(args);
-/*
-  argument-validation
-  arg1 = INTERVAL in minutes -> min = 5
-  arg2 = logActions
-*/
-const GLOBALS = {
-    T_INTERVAL: args.minutes !== null ? args.minutes < 5 ? (60000 * 5) : (args.minutes * 60000) : (60000 * 60),
-    T_INTERVAL_SET: args.interval !== null ? !(args.minutes == 'true') : false,
-    LOG_ACTIONS: args.log !== null ? !(args.log == 'false') : true
-}
 
-//global variables
+//globals
+const GLOBALS = {
+        T_INTERVAL: args.minutes !== null ? args.minutes < 5 ? (60000 * 5) : (args.minutes * 60000) : (60000 * 60),
+        T_INTERVAL_SET: args.interval !== null ? !(args.minutes == 'true') : false,
+        LOG_ACTIONS: args.log !== null ? !(args.log == 'false') : true
+    }
+    //global variables
 const CONFIG = JSON.parse(fs.readFileSync('./data/config.json', 'utf8'));
 const SETTINGS = {
     FILE_PATH: CONFIG.saveConfig.filePath,
     LOG_PATH: CONFIG.saveConfig.logPath,
     ID_ARRAY: CONFIG.tag_id_list,
-    EXPORT_TYPE: CONFIG.saveConfig.exportType,
+    EXPORT_TYPE: args.export !== null ? args.export : CONFIG.saveConfig.exportType,
     INITIALIZE_OLDITEMS: true,
     DEBUG: true
 }

@@ -38,6 +38,10 @@ node bot.js -h
   -l {true,false}, --log {true,false}
                         Log actions into a seperate file for each day
                         [DEFAULT: true]
+
+  -e {JSON,HTML,XML}, --export {JSON,HTML,XML}
+                        Log actions into a seperate file for each day
+                        [DEFAULT: found in ./config.json]                   
 ```
 
 ## Config
