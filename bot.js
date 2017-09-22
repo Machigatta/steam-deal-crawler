@@ -195,7 +195,10 @@ function exportData() {
     types.forEach(function(single_type) {
         switch (single_type) {
             case "JSON":
-                //TO-DO
+                //exportData[tagId] = { _id, _name, _price, _discount, _link }
+                fs.writeFile('./data/export/export_json.json', JSON.stringify(globalVariables.gamesWithDiscound), 'utf-8', function(err) {
+                    if (err) console.log(err);
+                });
                 break;
             case "XML":
                 //TO-DO
