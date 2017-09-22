@@ -87,8 +87,6 @@ function findDiscountsWithPerTag(object, pageResults) {
     request(options, function(error, response, json_body) {
         if (error) { console.log(error); } else {
             body = "<div>" + json_body["results_html"] + "</div>";
-            //console.log("> Checking Discount-Page number " + ((pageResults + 10) / 10) + " for the Tag: " + tagId);
-
             $(body).find('a').each(function(index, game) {
                 //to cut the '?snr=1_237_1600__106_5' from the url and minimize the data
                 var myurl = url.parse($(game).attr("href"), true);
@@ -97,8 +95,6 @@ function findDiscountsWithPerTag(object, pageResults) {
                 var v_name = $(game).find('div.tab_item_content > div.tab_item_name').text();
                 var v_price = $(game).find('div.discount_block > div.discount_prices > div.discount_final_price').text();
                 var v_discount = $(game).find('div.discount_block > div.discount_pct').text();
-                // console.log("The game >>" + name + "<< is reduced by " + discount + " to " + price + ".");
-
                 if (!globalVariables.gamesWithDiscound.hasOwnProperty(tagId)) {
                     globalVariables.gamesWithDiscound[tagId] = [];
                 }
@@ -107,7 +103,6 @@ function findDiscountsWithPerTag(object, pageResults) {
             });
 
             if (json_body["total_count"] >= pageResults + 10) {
-                //console.log("There are more pages to go to...");
                 findDiscountsWithPerTag(object, pageResults + 10);
             } else {
                 callBack();
@@ -205,7 +200,7 @@ function exportData() {
             case "XML":
                 //TO-DO
                 break;
-            case "WEBHOOK":
+            case "HTML":
                 //TO-DO
                 break;
             default:
