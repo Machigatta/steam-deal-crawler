@@ -5,6 +5,7 @@ var dom = new jsdom.JSDOM(`<!DOCTYPE html>`);
 var $ = require("jquery")(dom.window);
 var fs = require('fs');
 var url = require('url');
+var xml = require('xml');
 var ArgumentParser = require('argparse').ArgumentParser;
 var parser = new ArgumentParser({
     version: '0.0.1',
@@ -163,9 +164,7 @@ function callBack() {
             if (err) console.log(err);
         });
 
-        globalVariables.globalTagList = {};
-        globalVariables.callBackCount = 0;
-        globalVariables.gamesWithDiscound = {};
+        exportData();
     }
 }
 
@@ -201,7 +200,23 @@ function exportData() {
                 });
                 break;
             case "XML":
-                //TO-DO
+                var gwdXml = {};
+                var gwdXmlObject = [];
+                for (var key in globalVariables.gamesWithDiscound) {
+                    var singleXmlObj = {};
+                    var singleObj = globalVariables.gamesWithDiscound[key];
+                    var ar = [];
+                    singleObj.forEach(function(so, index) {
+                        ar.push({ item: [{ _id: so._id }, { _name: so._name }, { _price: so._price }, { _discount: so._discount }, { _link: so._link }] });
+                        singleXmlObj["items"] = ar;
+                    });
+                    gwdXmlObject.push({ tagname: [{ _attr: { attributes: key } }, singleXmlObj] });
+                    gwdXml["tags"] = gwdXmlObject;
+                }
+                //exportData[tagId] = { _id, _name, _price, _discount, _link }
+                fs.writeFile('./data/export/export_xml.xml', xml(gwdXml), 'utf-8', function(err) {
+                    if (err) console.log(err);
+                });
                 break;
             case "HTML":
                 //TO-DO
@@ -211,6 +226,10 @@ function exportData() {
                 break;
         }
     });
+
+    globalVariables.globalTagList = {};
+    globalVariables.callBackCount = 0;
+    globalVariables.gamesWithDiscound = {};
 }
 
 //RUN
