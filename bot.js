@@ -219,7 +219,24 @@ function exportData() {
                 });
                 break;
             case "HTML":
-                //TO-DO
+                var htmlContent = '<html><head><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"></head><body><div class="container"><table>';
+
+
+                for (var key in globalVariables.gamesWithDiscound) {
+                    var singleObj = globalVariables.gamesWithDiscound[key];
+                    htmlContent += '<h1>Categorie: ' + globalVariables.globalTagList[key] + ' <small>(' + key + ')</small></h1>';
+                    htmlContent += '<table class="table table-responsive table-bordered"><thead><tr><th>Game</th><th class="col-md-3">Discount</th><th class="col-md-3">New Price</th></tr></thead><tbody>';
+                    singleObj.forEach(function(so, index) {
+                        htmlContent += '<tr><td><a href="https://' + so._link + '">' + so._name + '</a></td><td> ' + so._discount + '</td><td>' + so._price + '</td></tr>';
+                    });
+                    htmlContent += '</tbody></table>';
+
+                }
+                htmlContent += '</div><body></html>';
+
+                fs.writeFile('./data/export/export_html.html', htmlContent, 'utf-8', function(err) {
+                    if (err) console.log(err);
+                });
                 break;
             default:
                 console.log(single_type + " is not a valid Export-Type.");
