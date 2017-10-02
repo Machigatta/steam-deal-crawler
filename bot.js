@@ -170,7 +170,7 @@ function callBack() {
 
 //logging-helper
 function logAction(content) {
-    var dir = "./logs";
+    var dir = SETTINGS.LOG_PATH;
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
     }
@@ -228,7 +228,7 @@ function exportData() {
 
                 for (var key in globalVariables.gamesWithDiscound) {
                     var singleObj = globalVariables.gamesWithDiscound[key];
-                    htmlContent += '<h1>Categorie: ' + globalVariables.globalTagList[key] + ' <small>(' + key + ')</small></h1>';
+                    htmlContent += '<h1>Category: ' + globalVariables.globalTagList[key] + ' <small>(' + key + ')</small></h1>';
                     htmlContent += '<table class="table table-responsive table-bordered"><thead><tr><th>Game</th><th class="col-md-3">Discount</th><th class="col-md-3">New Price</th></tr></thead><tbody>';
                     singleObj.forEach(function(so, index) {
                         htmlContent += '<tr><td><a href="https://' + so._link + '">' + so._name + '</a></td><td> ' + so._discount + '</td><td>' + so._price + '</td></tr>';
