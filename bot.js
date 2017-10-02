@@ -170,6 +170,10 @@ function callBack() {
 
 //logging-helper
 function logAction(content) {
+    var dir = "./logs";
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir);
+    }
     content = globalVariables.todayDate + " " + content;
     var logFileName = SETTINGS.LOG_PATH + (globalVariables.today.getMonth() + 1) + '_' + globalVariables.today.getDate() + '_' + globalVariables.today.getFullYear() + '.log';
     SETTINGS.DEBUG ? console.log(content) : "";
