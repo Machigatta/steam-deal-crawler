@@ -1,6 +1,6 @@
 {
     "name": "steam-deal-crawler",
-    "version": "1.0.1",
+    "version": "1.0.5",
     "description": "Crawl your Tags for discounts",
     "main": "bot.js",
     "scripts": {

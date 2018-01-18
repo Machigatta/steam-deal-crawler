@@ -151,24 +151,26 @@ function callBack() {
                     if (newEntry && SETTINGS.INITIALIZE_OLDITEMS) {
                         var singleLogMessage = "[NEW] " + single_obj._name + " with " + single_obj._discount + " to " + single_obj._price;
                         var webHooks = CONFIG.saveConfig.webHook;
-                        webHooks.forEach(function(webHook) {
-                            rest.postJson(webHook, {
-                                username: "steam-deal-crawler",
-                                embeds: [{
-                                    title: single_obj._name,
-                                    url: "http://" + single_obj._link,
-                                    description: ("Discount of `" + single_obj._discount + " down to `" +single_obj._price + "`"),
-                                    color: 244242,
-                                    image: {
-                                        url: "http://store.edgecast.steamstatic.com/public/shared/images/responsive/header_logo.png"
+                        if(CONFIG.saveConfig.useWebHook){
+                            webHooks.forEach(function(webHook) {
+                                rest.postJson(webHook, {
+                                    username: "steam-deal-crawler",
+                                    embeds: [{
+                                        title: single_obj._name,
+                                        url: "http://" + single_obj._link,
+                                        description: ("Discount of `" + single_obj._discount + " down to `" +single_obj._price + "`"),
+                                        color: 244242,
+                                        image: {
+                                            url: "http://store.edgecast.steamstatic.com/public/shared/images/responsive/header_logo.png"
+                                        }
+                                    }]
+                                }).on('complete', function(data, response) {
+                                    if (response.statusCode == 201) {
+                                        // you can get at the raw response like this...
                                     }
-                                }]
-                            }).on('complete', function(data, response) {
-                                if (response.statusCode == 201) {
-                                    // you can get at the raw response like this...
-                                }
-                            });
-                        })
+                                });
+                            })
+                        }
                         i++;
                         logAction(singleLogMessage);
                     }

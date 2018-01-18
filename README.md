@@ -1,4 +1,4 @@
-# THIS ONE IS UNDER DEVELOPEMENT
+# Version 1.0.5
 # steam-deal-crawler
 
 > Tired of adding every game from one genre to your wishlist on steam, just to be notified, when one will be on discount?
@@ -13,10 +13,18 @@ This node-js crawler searches through a tag-name and lists every discount with p
 - Filter through tags
 - Export into temporary json-datafile
 - Executing in intervals
+- Export into specific export-type [JSON, HTML, XML]
+- Send new items to discord-webhook
 
 ## Planed Features
-- Export into specific export-type
+- dynamic export/saved files
+- category-id finder
 
+## First Use
+Please execute the following command first, to get you /node_modules/ folder and the required modules
+```bash
+npm update
+```
 ## How to use
 #### if you need help
 ```bash
@@ -65,7 +73,11 @@ These ids will be used in the config.
     "saveConfig": {
         "filePath": "./data/saved.json",
         "logPath": "./logs/",
-        "exportType": "JSON"
+        "exportType": "JSON",
+        "useWebHook": false,
+        "webHook": [
+            "https://discordapp.com/api/webhooks/XXXXXXXXXXXXXXXXXX/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        ]
     },
     "tag_id_list": [{
         "id": 1,
@@ -79,13 +91,16 @@ These ids will be used in the config.
 ```
 
 ### Filled-Example
-
 ```json
 {
     "saveConfig": {
         "filePath": "./data/saved.json",
         "logPath": "./logs/",
-        "exportType": "JSON"
+        "exportType": "JSON",
+        "useWebHook": true,
+        "webHook": [
+            "https://discordapp.com/api/webhooks/403612757053931529/pfevSig6fTX8dThDkx9AHFQztqQ1CJnFM7B9RrUQtbJqcGuJRfS9H8pTHs7OGjpqIqNt"
+        ]
     },
     "tag_id_list": [{
         "id": 4085,
@@ -107,6 +122,8 @@ These ids will be used in the config.
 - fs
 - url
 - argparse
+- xml
+- restler
 
 ## License 
     The MIT License (MIT)
