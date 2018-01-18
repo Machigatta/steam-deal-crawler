@@ -27,8 +27,9 @@
     "dependencies": {
         "argparse": "^1.0.9",
         "jquery": "^3.2.1",
-        "jsdom": "^11.2.0",
-        "request": "^2.81.0",
+        "jsdom": "^11.5.1",
+        "request": "^2.83.0",
+        "restler": "^3.4.0",
         "xml": "^1.0.1"
     }
 }

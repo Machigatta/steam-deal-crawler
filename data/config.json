@@ -2,7 +2,10 @@
     "saveConfig": {
         "filePath": "./data/saved.json",
         "logPath": "./logs/",
-        "exportType": "JSON"
+        "exportType": "JSON",
+        "webHook": [
+            "https://discordapp.com/api/webhooks/403612757053931529/pfevSig6fTX8dThDkx9AHFQztqQ1CJnFM7B9RrUQtbJqcGuJRfS9H8pTHs7OGjpqIqNt"
+        ]
     },
     "tag_id_list": [{
         "id": 4085,

@@ -6,6 +6,7 @@ var $ = require("jquery")(dom.window);
 var fs = require('fs');
 var url = require('url');
 var xml = require('xml');
+var rest = require('restler');
 var ArgumentParser = require('argparse').ArgumentParser;
 var parser = new ArgumentParser({
     version: '0.0.1',
@@ -22,13 +23,13 @@ parser.addArgument(
 parser.addArgument(
     ['-i', '--interval'], {
         help: 'determine if the process should be executed in an interval, or just once [DEFAULT: false]',
-        choices: [true, false]
+        choices: ["true", "false"]
     }
 );
 parser.addArgument(
     ['-l', '--log'], {
         help: 'Log actions into a seperate file for each day [DEFAULT: true]',
-        choices: [true, false]
+        choices: ["true", "false"]
     }
 );
 parser.addArgument(
@@ -62,6 +63,7 @@ var globalVariables = {
     today: null,
     todayDate: null
 }
+
 
 //main function for recursive iteration through results
 function findDiscountsWithPerTag(object, pageResults) {
@@ -148,6 +150,25 @@ function callBack() {
 
                     if (newEntry && SETTINGS.INITIALIZE_OLDITEMS) {
                         var singleLogMessage = "[NEW] " + single_obj._name + " with " + single_obj._discount + " to " + single_obj._price;
+                        var webHooks = CONFIG.saveConfig.webHook;
+                        webHooks.forEach(function(webHook) {
+                            rest.postJson(webHook, {
+                                username: "steam-deal-crawler",
+                                embeds: [{
+                                    title: single_obj._name,
+                                    url: "http://" + single_obj._link,
+                                    description: ("Discount of `" + single_obj._discount + " down to `" +single_obj._price + "`"),
+                                    color: 244242,
+                                    image: {
+                                        url: "http://store.edgecast.steamstatic.com/public/shared/images/responsive/header_logo.png"
+                                    }
+                                }]
+                            }).on('complete', function(data, response) {
+                                if (response.statusCode == 201) {
+                                    // you can get at the raw response like this...
+                                }
+                            });
+                        })
                         i++;
                         logAction(singleLogMessage);
                     }
