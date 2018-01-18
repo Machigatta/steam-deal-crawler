@@ -1,4 +1,4 @@
-![steamlogo](https://i.imgur.com/nD5BACM.png)
+![steamlogo](https://i.imgur.com/vExtRT4.png)
 
 # Version 1.0.5
 # steam-deal-crawler
