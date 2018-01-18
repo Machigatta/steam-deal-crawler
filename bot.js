@@ -161,7 +161,7 @@ function callBack() {
                                         description: ("Discount of `" + single_obj._discount + "` down to `" +single_obj._price + "`"),
                                         color: 244242,
                                         image: {
-                                            url: "http://store.edgecast.steamstatic.com/public/shared/images/responsive/header_logo.png"
+                                            url: "https://i.imgur.com/nD5BACM.png"
                                         }
                                     }]
                                 }).on('complete', function(data, response) {
