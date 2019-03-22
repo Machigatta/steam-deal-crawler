@@ -185,9 +185,6 @@ function callBack() {
                                         ]
                                     }]
                                 }).on('complete', function(data, response) {
-                                    if (response.statusCode == 201) {
-                                        // you can get at the raw response like this...
-                                    }
                                 });
                             })
                         }
