@@ -16,8 +16,7 @@ var parser = new ArgumentParser({
 parser.addArgument(
     ['-m', '--minutes'], {
         help: 'Process-Interval in minutes -> min value is 5 [DEFAULT: 60]',
-        type: 'int',
-        choices: [">= 5"]
+        type: 'int'
     }
 );
 parser.addArgument(
@@ -38,6 +37,12 @@ parser.addArgument(
         choices: ["JSON", "HTML", "XML"]
     }
 );
+parser.addArgument(
+    ['-etp', '--export_to_file'], {
+        help: 'determine if the bot should export the content into a file',
+        choices: ["true", "false"]
+    }
+);
 var args = parser.parseArgs();
 
 //globals
@@ -53,6 +58,7 @@ const SETTINGS = {
     LOG_PATH: CONFIG.saveConfig.logPath,
     ID_ARRAY: CONFIG.tag_id_list,
     EXPORT_TYPE: args.export !== null ? args.export : CONFIG.saveConfig.exportType,
+    EXPORT_TO_FILE: args.export_to_file !== null ? args.export_to_file : CONFIG.saveConfig.exportToFile,
     INITIALIZE_OLDITEMS: true,
     DEBUG: true
 }
@@ -67,12 +73,16 @@ var globalVariables = {
 
 //main function for recursive iteration through results
 function findDiscountsWithPerTag(object, pageResults) {
-    if (typeof pageResults === 'undefined') { pageResults = 0; }
+    if (typeof pageResults === 'undefined') { pageResults = 1; }
+
+    
 
     var tagId = object.id;
     var specificTagList = object.taglist;
     globalVariables.globalTagList[tagId] = object.name;
     var extraTagList = "";
+
+    logAction(`[WORKING] Checking ${tagId} for page ${pageResults}`);
 
     //taglists are used to filter-results even further
     if (typeof specificTagList !== 'undefined' && specificTagList.length > 0) {
@@ -83,30 +93,35 @@ function findDiscountsWithPerTag(object, pageResults) {
 
     //request-options 
     var options = {
-        url: 'http://store.steampowered.com/tagdata/querypaginated/de/' + tagId + '/Discounts/render/?query=&start=' + pageResults + '&count=10&cc=DE&l=german&no_violence=0&no_sex=0&v=4' + extraTagList,
+        url: 'https://store.steampowered.com/search/?sort_by=Price_ASC&tags=' + tagId + '&specials=1&page=' + pageResults + extraTagList,
         method: 'GET',
         json: true
     }
     request(options, function(error, response, json_body) {
         if (error) { console.log(error); } else {
-            body = "<div>" + json_body["results_html"] + "</div>";
-            $(body).find('a').each(function(index, game) {
+            body = "<div>" + $(json_body).find("div#search_results").html() + "</div>";
+            $(body).find('a.search_result_row').each(function(index, game) {
                 //to cut the '?snr=1_237_1600__106_5' from the url and minimize the data
                 var myurl = url.parse($(game).attr("href"), true);
                 var v_link = myurl.host + myurl.pathname;
                 var v_id = $(game).data("ds-appid");
-                var v_name = $(game).find('div.tab_item_content > div.tab_item_name').text();
-                var v_price = $(game).find('div.discount_block > div.discount_prices > div.discount_final_price').text();
-                var v_discount = $(game).find('div.discount_block > div.discount_pct').text();
+                var v_name = $(game).find('.search_name > span.title').text();
+                var temp_price = $(game).find('.search_price_discount_combined > .search_price').html();
+                temp_price = temp_price.split("<br>");
+                var v_price = temp_price[1].trim();
+                var v_price_old = $(temp_price[0]).find("strike").text();
+                var v_discount = $(game).find('.search_price_discount_combined > .search_discount > span').text();
+                var v_image = $(game).find(".search_capsule > img").attr("src");
                 if (!globalVariables.gamesWithDiscound.hasOwnProperty(tagId)) {
                     globalVariables.gamesWithDiscound[tagId] = [];
                 }
 
-                globalVariables.gamesWithDiscound[tagId].push({ _id: v_id, _name: v_name, _price: v_price, _discount: v_discount, _link: v_link });
+                globalVariables.gamesWithDiscound[tagId].push({ _id: v_id, _name: v_name, _price: v_price, _price_old: v_price_old, _discount: v_discount, _link: v_link, _image: v_image });
             });
 
-            if (json_body["total_count"] >= pageResults + 10) {
-                findDiscountsWithPerTag(object, pageResults + 10);
+            maxPage = Math.ceil($(body).find(".search_pagination_left").text().split(" of ")[1].trim() / 25);
+            if (pageResults < maxPage) {
+                findDiscountsWithPerTag(object, pageResults + 1);
             } else {
                 callBack();
             }
@@ -158,11 +173,16 @@ function callBack() {
                                     embeds: [{
                                         title: single_obj._name,
                                         url: "http://" + single_obj._link,
-                                        description: ("Discount of `" + single_obj._discount + "` down to `" +single_obj._price + "`"),
+                                        description: ("Discount of `" + single_obj._discount + "`. From `"+ single_obj._price_old+"` down to `" +single_obj._price + "`"),
                                         color: 244242,
-                                        image: {
-                                            url: "https://i.imgur.com/nD5BACM.png"
-                                        }
+                                        thumbnail: {
+                                            url: single_obj._image
+                                        },
+                                        fields: [
+                                            { name: "Old Price", value: single_obj._price_old, inline: true },
+                                            { name: "New Price", value: single_obj._price, inline: true },
+                                            { name: "Discount", value: single_obj._discount, inline: true }
+                                        ]
                                     }]
                                 }).on('complete', function(data, response) {
                                     if (response.statusCode == 201) {
@@ -187,7 +207,9 @@ function callBack() {
             if (err) console.log(err);
         });
 
-        exportData();
+        if (SETTINGS.EXPORT_TO_FILE){
+            exportData();
+        }
     }
 }
 
@@ -211,7 +233,7 @@ function execute() {
     globalVariables.todayDate = "[" + (globalVariables.today.getMonth() + 1) + '/' + globalVariables.today.getDate() + '/' + globalVariables.today.getFullYear() + " " + (globalVariables.today.getHours() < 10 ? "0" + globalVariables.today.getHours() : globalVariables.today.getHours()) + ":" + (globalVariables.today.getMinutes() < 10 ? "0" + globalVariables.today.getMinutes() : globalVariables.today.getMinutes()) + "]";
     SETTINGS.DEBUG ? console.log(globalVariables.todayDate + " [START] Executing main-functionality") : "";
     SETTINGS.ID_ARRAY.forEach(function(object) {
-        findDiscountsWithPerTag(object, 0);
+        findDiscountsWithPerTag(object, 1);
     });
 }
 
@@ -234,7 +256,7 @@ function exportData() {
                     var singleObj = globalVariables.gamesWithDiscound[key];
                     var ar = [];
                     singleObj.forEach(function(so, index) {
-                        ar.push({ item: [{ _id: so._id }, { _name: so._name }, { _price: so._price }, { _discount: so._discount }, { _link: so._link }] });
+                        ar.push({ item: [{ _id: so._id }, { _name: so._name }, { _price: so._price }, { _price_old: so._price_old }, { _discount: so._discount }, { _link: so._link }, { _image: so._image }] });
                         singleXmlObj["items"] = ar;
                     });
                     gwdXmlObject.push({ tagname: [{ _attr: { attributes: key } }, singleXmlObj] });

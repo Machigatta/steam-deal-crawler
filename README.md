@@ -1,7 +1,6 @@
-![steamlogo](https://i.imgur.com/vExtRT4.png)
-
-# Version 1.0.5
 # steam-deal-crawler
+### Version 1.1.0
+[![dependencies Status](https://david-dm.org/machigatta/steam-deal-crawler/status.svg)](https://david-dm.org/machigatta/steam-deal-crawler)
 
 > Tired of adding every game from one genre to your wishlist on steam, just to be notified, when one will be on discount?
 
@@ -17,6 +16,7 @@ This node-js crawler searches through a tag-name and lists every discount with p
 - Executing in intervals
 - Export into specific export-type [JSON, HTML, XML]
 - Send new items to discord-webhook
+- Disable / Enable export
 
 ## Planed Features
 - dynamic export/saved files
@@ -25,7 +25,7 @@ This node-js crawler searches through a tag-name and lists every discount with p
 ## First Use
 Please execute the following command first, to get you /node_modules/ folder and the required modules
 ```bash
-npm update
+npm install
 ```
 ## How to use
 #### if you need help
@@ -36,22 +36,21 @@ node bot.js -h
 ```bash
   -h, --help            Show this help message and exit.
   -v, --version         Show programs version number and exit.
-
-  -m {>= 5}, --minutes {>= 5}
+  -m MINUTES, --minutes MINUTES
                         Process-Interval in minutes -> min value is 5
                         [DEFAULT: 60]
-
   -i {true,false}, --interval {true,false}
                         determine if the process should be executed in an
                         interval, or just once [DEFAULT: false]
-                        
   -l {true,false}, --log {true,false}
                         Log actions into a seperate file for each day
                         [DEFAULT: true]
-
   -e {JSON,HTML,XML}, --export {JSON,HTML,XML}
                         Log actions into a seperate file for each day
-                        [DEFAULT: found in ./config.json]                   
+                        [DEFAULT: found in ./config.json]
+  -etp {true,false}, --export_to_file {true,false}
+                        determine if the bot should export the content into a
+                        file
 ```
 
 ## Config
@@ -77,6 +76,7 @@ These ids will be used in the config.
         "logPath": "./logs/",
         "exportType": "JSON",
         "useWebHook": false,
+        "exportToFile": false,
         "webHook": [
             "https://discordapp.com/api/webhooks/XXXXXXXXXXXXXXXXXX/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         ]
@@ -100,6 +100,7 @@ These ids will be used in the config.
         "logPath": "./logs/",
         "exportType": "JSON",
         "useWebHook": true,
+        "exportToFile": true,
         "webHook": [
             "https://discordapp.com/api/webhooks/403612757053931529/pfevSig6fTX8dThDkx9AHFQztqQ1CJnFM7B9RrUQtbJqcGuJRfS9H8pTHs7OGjpqIqNt"
         ]
